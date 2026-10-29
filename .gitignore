@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.vercel/
+.neon
+.env
+.env.local
+.env.*.local
+*.log
+*.tsbuildinfo
+.DS_Store
+coverage/
+.neon
