@@ -26,19 +26,21 @@ export default async function MemberPage({ params }: { params: Promise<{ token: 
     amount: payment.amount,
     overdue: payment.dueDate < today,
   }));
+  const canReceivePayments = association.status === "active";
 
   return <main className="member-page">
-    <header className="member-hero"><div className="public-brand"><span>ج</span> جمعيتي</div><div className="member-greeting"><span>أهلًا،</span><h1>{member.name}</h1><p>{association.name}</p></div><div className="hero-orb orb-one" /><div className="hero-orb orb-two" /></header>
+    <header className="member-hero"><div className="public-brand"><span>ج</span> جمعيتي</div><div className="member-greeting"><span>أهلًا،</span><h1>{member.name}{member.secondaryName ? ` و${member.secondaryName}` : ""}</h1><p>{association.name}</p></div><div className="hero-orb orb-one" /><div className="hero-orb orb-two" /></header>
     <div className="member-content">
       <section className="member-stats">
-        <article><div className="stat-icon"><CircleDollarSign /></div><span>قيمة دفعتك الشهرية</span><strong>{formatMoney(association.installmentAmount * ownShares.length)}</strong></article>
+        <article><div className="stat-icon"><CircleDollarSign /></div><span>قيمة دفعتك الشهرية</span><strong>{formatMoney(ownShares.reduce((sum, share) => sum + Math.round(association.installmentAmount * share.sharePercent / 100), 0))}</strong></article>
         <article><div className="stat-icon"><Clock3 /></div><span>إجمالي المتبقي</span><strong>{formatMoney(remainingAmount)}</strong></article>
         <article><div className="stat-icon"><Layers3 /></div><span>الدفعات</span><strong>{paidCount} من {payments.length}</strong><small>{pendingCount ? `${pendingCount} قيد المراجعة` : ""}</small></article>
       </section>
 
-      <section className="payout-section"><div className="public-section-title"><div><CalendarCheck /><span><b>مواعيد قبضك</b><small>كل سهم له دور مستقل</small></span></div></div><div className="payout-cards">{ownShares.map((share) => <article key={share.id}><span>{share.label}</span><strong>{cycleLabel(association.startDate, share.payoutOrder)}</strong><small>قيمة القبضة {formatMoney(association.installmentAmount * payments.length)}</small></article>)}</div></section>
+      <section className="payout-section"><div className="public-section-title"><div><CalendarCheck /><span><b>مواعيد قبضك</b><small>كل سهم له دور مستقل</small></span></div></div><div className="payout-cards">{ownShares.map((share) => <article key={share.id}><span>{share.label} · {share.sharePercent === 50 ? "نصف سهم" : "سهم كامل"}</span><strong>{cycleLabel(association.startDate, share.payoutOrder)}</strong><small>قيمة القبضة {formatMoney(Math.round(association.installmentAmount * payments.length * share.sharePercent / 100))}</small></article>)}</div></section>
 
-      <PaymentUpload token={token} options={options} />
+      {!canReceivePayments && <div className="association-notice"><b>{association.status === "paused" ? "الجمعية متوقفة مؤقتًا" : "الجمعية مكتملة"}</b><span>يمكنك مشاهدة بياناتك وسجل دفعاتك، لكن رفع دفعات جديدة متوقف حاليًا.</span></div>}
+      {canReceivePayments && <PaymentUpload token={token} options={options} />}
 
       <section className="history-card"><div className="public-section-title"><div><Clock3 /><span><b>سجل الدفعات</b><small>آخر حالة لكل شهر</small></span></div></div><div className="history-list">{payments.map((payment) => <div key={payment.id}><span><b>{cycleLabel(association.startDate, payment.cycleNumber)}</b><small>{formatMoney(payment.amount)}</small></span><em className={`payment-status ${payment.status}`}>{statusText[payment.status]}</em></div>)}</div></section>
       <footer className="public-footer">هذا الرابط خاص بك، لا تشاركه مع أي شخص.</footer>

@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectsCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 function config() {
@@ -32,4 +32,16 @@ export async function uploadPrivateFile(key: string, body: Uint8Array, contentTy
 export async function signedProofUrl(key: string) {
   const value = config();
   return getSignedUrl(client(), new GetObjectCommand({ Bucket: value.bucket, Key: key }), { expiresIn: 300 });
+}
+
+export async function deletePrivateFiles(keys: Array<string | null | undefined>) {
+  const uniqueKeys = [...new Set(keys.filter((key): key is string => Boolean(key)))];
+  if (!uniqueKeys.length) return;
+  const value = config();
+  for (let index = 0; index < uniqueKeys.length; index += 1000) {
+    await client().send(new DeleteObjectsCommand({
+      Bucket: value.bucket,
+      Delete: { Objects: uniqueKeys.slice(index, index + 1000).map((Key) => ({ Key })), Quiet: true },
+    }));
+  }
 }

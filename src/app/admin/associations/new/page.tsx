@@ -14,6 +14,7 @@ export default function NewAssociationPage() {
           <label>قيمة السهم شهريًا<div className="input-with-icon"><CircleDollarSign size={19} /><input name="installmentAmount" type="number" min="1" step="1" placeholder="5000" required /></div></label>
           <label>تاريخ بداية الجمعية<div className="input-with-icon"><CalendarDays size={19} /><input name="startDate" type="date" defaultValue={today} required /></div></label>
         </div>
+        <label>عدد أدوار الجمعية <small>(اختياري)</small><input name="plannedSlots" type="number" min="1" step="1" placeholder="مثال: 10" /><small>لو سيبته فاضي، المدة هتتحدد تلقائيًا من أكبر دور تضيفه.</small></label>
         <label>يوم الدفع من كل شهر<input name="paymentDay" type="number" min="1" max="28" defaultValue="1" required /><small>اختر من 1 إلى 28 حتى يظل الموعد صالحًا في كل الشهور.</small></label>
         <button className="button primary" type="submit">إنشاء الجمعية والمتابعة</button>
       </form>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LayoutDashboard, LogOut, Settings, UsersRound } from "lucide-react";
 import { logout } from "@/actions/auth";
+import { MobileNav } from "@/components/mobile-nav";
 import { getAdmin } from "@/lib/auth";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <header className="mobile-header"><Link href="/admin" className="sidebar-brand"><span>ج</span><strong>جمعيتي</strong></Link><span className="muted">{admin.username}</span></header>
         {children}
       </div>
+      <MobileNav />
     </div>
   );
 }

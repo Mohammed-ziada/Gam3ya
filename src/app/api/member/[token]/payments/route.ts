@@ -1,7 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { members, monthlyPayments, paymentSubmissions } from "@/lib/schema";
+import { associations, members, monthlyPayments, paymentSubmissions } from "@/lib/schema";
 import { uploadPrivateFile } from "@/lib/storage";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -11,6 +11,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { token } = await params;
     const [member] = await db.select().from(members).where(and(eq(members.publicToken, token), eq(members.active, true))).limit(1);
     if (!member) return NextResponse.json({ error: "الرابط غير صالح" }, { status: 404 });
+    const [association] = await db.select({ status: associations.status }).from(associations).where(eq(associations.id, member.associationId)).limit(1);
+    if (!association || association.status !== "active") return NextResponse.json({ error: "الجمعية لا تستقبل دفعات حاليًا" }, { status: 409 });
 
     const form = await request.formData();
     const proof = form.get("proof");
